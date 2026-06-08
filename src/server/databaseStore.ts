@@ -313,36 +313,34 @@ class DatabaseStore {
         }
       }
 
+      // Get count before any startup operations
+      let countBefore = 0;
+      try {
+        const countRes = await this.pool.query("SELECT COUNT(*) FROM players");
+        countBefore = parseInt(countRes.rows[0].count, 10);
+      } catch (err: any) {
+        console.error("❌ Failed to query row count before startup:", err.message);
+      }
+      console.log(`Database rows before startup: ${countBefore}`);
+
       // Synchronize in-memory cache state with PostgreSQL values
       await this.loadCacheFromPostgres();
-
-      // Check and execute requested accounts wipe (one-time operation)
-      const wipeLockPath = path.join(process.cwd(), ".database_wiped_neon_adm_v10");
-      if (!fs.existsSync(wipeLockPath)) {
-        console.log("🧼 جاري تنظيف وحذف جميع الحسابات وبيانات اللاعبين السابقة من PostgreSQL...");
-        const client = await this.pool.connect();
-        try {
-          await client.query("DELETE FROM friend_relations;");
-          await client.query("DELETE FROM game_reports;");
-          await client.query("DELETE FROM chat_messages;");
-          await client.query("DELETE FROM guilds;");
-          await client.query("DELETE FROM players;");
-          fs.writeFileSync(wipeLockPath, "true");
-          console.log("🧼 تمت عملية التنظيف بنجاح وبدء تهيئة نظيفة لقاعدة البيانات!");
-        } catch (wipeErr) {
-          console.error("❌ خطأ أثناء تنظيف الحسابات السابقة:", wipeErr);
-        } finally {
-          client.release();
-        }
-        // Reload cache to match the deleted state
-        await this.loadCacheFromPostgres();
-      }
 
       this.dbConnected = true;
       console.log("⚡ تم دمج قاعدة بيانات PostgreSQL في الكاش المتزامن الموضعي بنجاح!");
 
       // Ensure the default Administrator exists
       await this.ensureAdmin();
+
+      // Get count after all startup operations
+      let countAfter = 0;
+      try {
+        const countRes = await this.pool.query("SELECT COUNT(*) FROM players");
+        countAfter = parseInt(countRes.rows[0].count, 10);
+      } catch (err: any) {
+        console.error("❌ Failed to query row count after startup:", err.message);
+      }
+      console.log(`Database rows after startup: ${countAfter}`);
     } catch (e) {
       console.error("❌ فشلت تهيئة أو الربط والتهيئة مع Neon PostgreSQL:", e);
       console.log("⚠️ سيستمر المعالج باستعمال الكاش المحلي لتلافي إيقاف التطبيق.");
@@ -423,10 +421,9 @@ class DatabaseStore {
 
     const client = await this.pool.connect();
     try {
-      // Direct query to find existing admin configurations
+      // Direct query to find existing admin configurations strictly on the designated id
       const res = await client.query(
-        "SELECT * FROM players WHERE id = 'admin_user' OR LOWER(email) = $1 OR role = 'admin'",
-        [adminEmail]
+        "SELECT * FROM players WHERE id = 'admin_user'"
       );
 
       const salt = bcrypt.genSaltSync(10);
@@ -459,17 +456,6 @@ class DatabaseStore {
       } else {
         const mainRow = res.rows[0];
 
-        // Ensure ONLY one administrator is created by cleaning up additional queries matching credentials
-        if (res.rows.length > 1) {
-          console.warn(`⚠️ تم العثور على أكثر من صف يطابق شروط الإدارة. جاري التطهير وإبقاء صف واحد فقط...`);
-          for (let i = 1; i < res.rows.length; i++) {
-            const rowToDelete = res.rows[i];
-            if (rowToDelete.id !== mainRow.id) {
-              await client.query("DELETE FROM players WHERE id = $1", [rowToDelete.id]);
-            }
-          }
-        }
-
         // Sync or correct credentials and role
         let needUpdate = false;
         const currentPassHash = mainRow.password_hash;
@@ -482,8 +468,8 @@ class DatabaseStore {
         if (needUpdate) {
           console.log("🛠️ جاري تحديث بيانات المشرف العام ببيانات .env الجديدة...");
           await client.query(
-            "UPDATE players SET role = 'admin', email = $1, password_hash = $2, username = 'المشرف العام', id = 'admin_user' WHERE id = $3",
-            [adminEmail, hashedPassword, mainRow.id]
+            "UPDATE players SET role = 'admin', email = $1, password_hash = $2, username = 'المشرف العام', id = 'admin_user' WHERE id = 'admin_user'",
+            [adminEmail, hashedPassword]
           );
         }
       }
