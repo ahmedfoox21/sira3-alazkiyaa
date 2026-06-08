@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import path from "path";
 import dotenv from "dotenv";
+import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 
@@ -1589,6 +1590,25 @@ function forfeitMatch(matchId: string, quitterId: string, customReason: string) 
 const isProduction = process.env.NODE_ENV === "production";
 
 async function bootApp() {
+  // تفعيل نسخ أيقونة التطبيق المخصصة إلى المجلد العام للمظاهر وتجهيزها للهاتف
+  try {
+    const publicDir = path.join(process.cwd(), "public");
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir, { recursive: true });
+    }
+    const sourceIcon = path.join(process.cwd(), "src", "assets", "images", "game_app_icon_1780942209376.png");
+    if (fs.existsSync(sourceIcon)) {
+      fs.copyFileSync(sourceIcon, path.join(publicDir, "icon.png"));
+      fs.copyFileSync(sourceIcon, path.join(publicDir, "logo.png"));
+      fs.copyFileSync(sourceIcon, path.join(publicDir, "apple-touch-icon.png"));
+      console.log("🎨 تم نسخ وتأمين أيقونات اللعبة المتبقية في مجلد التطبيق العام بنجاح!");
+    } else {
+      console.warn("⚠️ لم يتم العثور على أيقونة اللعبة المصدرية في: " + sourceIcon);
+    }
+  } catch (iconErr) {
+    console.error("❌ خطأ أثناء نسخ أيقونة اللعبة:", iconErr);
+  }
+
   if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },

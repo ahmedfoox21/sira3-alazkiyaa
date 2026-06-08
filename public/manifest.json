@@ -1,0 +1,23 @@
+{
+  "name": "صراع الأذكياء - لعبة المسابقات الجماعية أونلاين",
+  "short_name": "صراع الأذكياء",
+  "description": "لعبة مسابقات جماعية وتحدي عقول أونلاين حماسية وشيقة غنية بالثقافة والإثارة",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070512",
+  "theme_color": "#070512",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
