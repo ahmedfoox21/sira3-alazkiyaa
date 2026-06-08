@@ -729,7 +729,7 @@ export default function App() {
         currentQuestionIndex: 0,
         scores: {},
         answersSubmitted: {},
-        timer: 6,
+        timer: 15,
         status: "playing"
       };
       // Bind players

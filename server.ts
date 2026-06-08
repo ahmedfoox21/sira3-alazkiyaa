@@ -1295,7 +1295,7 @@ async function startTriviaMatch(room: Room) {
     currentQuestionIndex: 0,
     scores: {},
     answersSubmitted: {},
-    timer: 6, // 6 seconds for each question
+    timer: 15, // 15 seconds for each question
     status: "playing"
   };
 
@@ -1376,7 +1376,7 @@ function advanceMatchRound(matchId: string) {
     // Reset submissions
     nextMatch.answersSubmitted = {};
     nextMatch.currentQuestionIndex += 1;
-    nextMatch.timer = 6;
+    nextMatch.timer = 15;
     nextMatch.status = "playing";
 
     if (nextMatch.currentQuestionIndex >= nextMatch.questions.length) {
