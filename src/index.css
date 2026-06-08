@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    background-color: #0d091a;
+    color: #e0def4;
+    font-family: "Tajawal", sans-serif;
+    direction: rtl;
+    overflow-x: hidden;
+  }
+
+  /* Disable text selection everywhere except inputs and textareas */
+  *:not(input):not(textarea):not([contenteditable="true"]) {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Animations & Glowing effects */
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(234, 179, 8, 0.4), 0 0 15px rgba(234, 179, 8, 0.2);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 25px rgba(234, 179, 8, 0.4);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+}
+
+.animate-glow {
+  animation: pulseGlow 2.5s infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(13, 9, 26, 0.9);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
+}
+
+.neon-border-gold {
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.5);
+  border: 1px solid rgba(234, 179, 8, 0.5);
+}
+
+.neon-border-purple {
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+}
+
+.neon-border-cyan {
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+}
+
+/* RTL Helpers */
+.rtl-flip {
+  transform: scaleX(-1);
+}
