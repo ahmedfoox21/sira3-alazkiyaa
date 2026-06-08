@@ -1593,21 +1593,39 @@ async function bootApp() {
   // تفعيل نسخ أيقونة التطبيق المخصصة إلى المجلد العام للمظاهر وتجهيزها للهاتف
   try {
     const publicDir = path.join(process.cwd(), "public");
+    const distDir = path.join(process.cwd(), "dist");
+    
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
     }
     const sourceIcon = path.join(process.cwd(), "src", "assets", "images", "game_app_icon_1780942209376.png");
     if (fs.existsSync(sourceIcon)) {
+      // نسخ للمجلد العام
       fs.copyFileSync(sourceIcon, path.join(publicDir, "icon.png"));
       fs.copyFileSync(sourceIcon, path.join(publicDir, "logo.png"));
       fs.copyFileSync(sourceIcon, path.join(publicDir, "apple-touch-icon.png"));
-      console.log("🎨 تم نسخ وتأمين أيقونات اللعبة المتبقية في مجلد التطبيق العام بنجاح!");
+      
+      // نسخ لمجلد التوزيع (dist) إن وجد لتأمين الحواف في وضع الإنتاج
+      if (fs.existsSync(distDir)) {
+        fs.copyFileSync(sourceIcon, path.join(distDir, "icon.png"));
+        fs.copyFileSync(sourceIcon, path.join(distDir, "logo.png"));
+        fs.copyFileSync(sourceIcon, path.join(distDir, "apple-touch-icon.png"));
+        
+        const manifestSrc = path.join(publicDir, "manifest.json");
+        if (fs.existsSync(manifestSrc)) {
+          fs.copyFileSync(manifestSrc, path.join(distDir, "manifest.json"));
+        }
+      }
+      console.log("🎨 تم نسخ وتأمين أيقونات اللعبة المتبقية في مجلد التطبيق العام ومجلد dist بنجاح!");
     } else {
       console.warn("⚠️ لم يتم العثور على أيقونة اللعبة المصدرية في: " + sourceIcon);
     }
   } catch (iconErr) {
     console.error("❌ خطأ أثناء نسخ أيقونة اللعبة:", iconErr);
   }
+
+  // خدمة مجلد public مباشرة لضمان وصول المتصفح للأيقونة وملف المانيفست في جميع الأوقات
+  app.use(express.static(path.join(process.cwd(), "public")));
 
   if (!isProduction) {
     const vite = await createViteServer({
